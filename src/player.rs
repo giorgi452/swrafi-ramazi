@@ -29,9 +29,16 @@ impl Player {
             self.x += 1;
         }
 
-        if d.is_key_pressed(KeyboardKey::KEY_SPACE) && !self.is_jumping {
+        if d.is_key_down(KeyboardKey::KEY_A) {
+            self.x -= 1;
+        }
+
+        if (d.is_key_pressed(KeyboardKey::KEY_SPACE) && !self.is_jumping)
+            || (d.is_key_pressed(KeyboardKey::KEY_W) && !self.is_jumping)
+        {
             self.jump(d.get_screen_height() - 70);
         }
+
         self.update(d.get_screen_height() - 70);
     }
 
@@ -47,6 +54,7 @@ impl Player {
             self.velocity = JUMP_FORCE;
         }
     }
+
     fn update(&mut self, ground_level: i32) {
         self.apply_gravity(ground_level, GRAVITY);
 

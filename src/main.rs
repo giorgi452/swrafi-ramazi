@@ -1,6 +1,9 @@
+use platform::Platform;
 use player::Player;
+use rand::Rng;
 use raylib::prelude::*;
 
+pub mod platform;
 pub mod player;
 
 fn main() {
@@ -28,6 +31,17 @@ fn main() {
     );
     // ----------------------
 
+    let mut rng = rand::thread_rng();
+    let random_number: i32 = rng.gen_range(1..=get_monitor_width(get_current_monitor()));
+
+    let mut platform = Platform::new(
+        random_number,
+        get_monitor_height(get_current_monitor()) - 80,
+        50,
+        10,
+        true,
+    );
+
     // While window isn't closed
     // -------------------------
     while !rl.window_should_close() {
@@ -44,6 +58,11 @@ fn main() {
         player.draw(&mut d);
         {
             player.movements(&mut d);
+            platform.move_left()
+        }
+
+        if platform.show {
+            platform.draw(&mut d);
         }
     }
     // -------------------------
