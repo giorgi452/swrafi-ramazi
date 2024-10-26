@@ -6,63 +6,65 @@ use raylib::prelude::*;
 pub mod platform;
 pub mod player;
 
-fn main() {
-    // Setup Window
-    // ------------
-    let (mut rl, thread) = raylib::init().title("Swrafi Ramazi").build();
-    // ------------
+pub enum GameState {
+    STARTMENU,
+    ACTGAME,
+    GAMEOVER,
+}
 
-    // Toggle Fullscreen and Focus
-    // --------------------------
+fn main() {
+    let mut game_state = GameState::ACTGAME;
+    let (mut rl, thread) = raylib::init().title("Swrafi Ramazi").build();
+
     rl.toggle_fullscreen();
     rl.toggle_borderless_windowed();
     rl.set_window_focused();
     rl.hide_cursor();
     rl.set_target_fps(240);
-    // --------------------------
 
-    // Create Player Instance
-    // ----------------------
     let mut player = Player::new(
         5,
         get_monitor_height(get_current_monitor()) - 70,
         0.0,
         false,
     );
-    // ----------------------
 
     let mut rng = rand::thread_rng();
-    let random_number: i32 = rng.gen_range(1..=get_monitor_width(get_current_monitor()));
+    let mut platforms: Vec<Platform> = (0..20)
+        .map(|_| {
+            let x = rng.gen_range(0..get_monitor_width(get_current_monitor()));
+            let y = rng.gen_range(
+                get_monitor_height(get_current_monitor()) - 150
+                    ..get_monitor_height(get_current_monitor()) - 5,
+            );
+            Platform::new(x, y, 20, 10, true)
+        })
+        .collect();
 
-    let mut platform = Platform::new(
-        random_number,
-        get_monitor_height(get_current_monitor()) - 80,
-        50,
-        10,
-        true,
-    );
-
-    // While window isn't closed
-    // -------------------------
     while !rl.window_should_close() {
-        // Begin Drawing
-        // -------------
         let mut d = rl.begin_drawing(&thread);
-        // -------------
 
-        // Set Background
-        // --------------
         d.clear_background(Color::BLACK);
-        // --------------
+        match game_state {
+            GameState::STARTMENU => {}
+            GameState::ACTGAME => {
+                player.draw(&mut d);
 
-        player.draw(&mut d);
-        {
-            player.movements(&mut d);
-            platform.move_left()
-        }
+                {
+                    for platform in &mut platforms {
+                        if platform.show {
+                            platform.draw(&mut d);
+                        }
+                    }
+                }
 
-        if platform.show {
-            platform.draw(&mut d);
+                {
+                    player.movements(&mut d, &mut platforms, &mut game_state);
+                }
+            }
+            GameState::GAMEOVER => {
+                d.draw_text("Game Over", 50, 50, 20, Color::RED);
+            }
         }
     }
     // -------------------------

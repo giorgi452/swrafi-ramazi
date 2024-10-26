@@ -20,7 +20,7 @@ impl Platform {
     }
 
     pub fn draw(&self, d: &mut RaylibDrawHandle<'_>) {
-        d.draw_rectangle(self.x, self.y, self.width, self.height, Color::BLUE);
+        d.draw_circle(self.x, self.y, self.width as f32, Color::GOLD);
     }
 
     pub fn move_left(&mut self) {

@@ -1,6 +1,8 @@
 use raylib::prelude::*;
 
-const GRAVITY: f32 = 0.5;
+use crate::{platform::Platform, GameState};
+
+const GRAVITY: f32 = 0.2;
 const JUMP_FORCE: f32 = -10.0;
 
 pub struct Player {
@@ -24,9 +26,25 @@ impl Player {
         d.draw_rectangle(self.x, self.y, 50, 50, Color::RED);
     }
 
-    pub fn movements(&mut self, d: &mut RaylibDrawHandle<'_>) {
+    pub fn movements(
+        &mut self,
+        d: &mut RaylibDrawHandle<'_>,
+        platforms: &mut Vec<Platform>,
+        game_state: &mut GameState,
+    ) {
         if d.is_key_down(KeyboardKey::KEY_D) {
             self.x += 1;
+
+            for platform in platforms {
+                if platform.show {
+                    platform.move_left();
+                    if (platform.x - 50..=platform.x + 50).contains(&self.x)
+                        && (platform.y - 50..=platform.y + 50).contains(&self.y)
+                    {
+                        *game_state = GameState::GAMEOVER;
+                    }
+                }
+            }
         }
 
         if d.is_key_down(KeyboardKey::KEY_A) {
